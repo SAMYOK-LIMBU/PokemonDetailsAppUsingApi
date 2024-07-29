@@ -1,16 +1,9 @@
-import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  Touchable,
-  View,
-} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {useRoute} from '@react-navigation/native';
-import images from '../assets';
+import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {useRoute, useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-import {useNavigation} from '@react-navigation/native';
+import images from '../assets';
+import * as Progress from 'react-native-progress';
 
 const AboutScreen = () => {
   const route = useRoute();
@@ -65,38 +58,22 @@ const AboutScreen = () => {
         <Image source={{uri: pokemon.image}} style={styles.image} />
         <View style={styles.infoContainer}>
           <Text style={styles.name}>{pokemon.name}</Text>
-          <View
-            style={{
-              flexDirection: 'row',
-            }}>
+          <View style={styles.row}>
             {details.types && details.types[0] && (
-              <Text style={styles.type}>{details.types[0].type.name}</Text>
+              <Text style={styles.type}>
+                Pokémon Type: {details.types[0].type.name}
+              </Text>
             )}
             <TouchableOpacity
-              style={{
-                backgroundColor: 'grey',
-                marginLeft: '60%',
-                borderRadius: 6,
-                padding: 12,
-              }}
+              style={styles.button}
               onPress={() =>
                 navigation.navigate('Moves', {moves: details.moves})
               }>
-              <Text style={{fontSize: 18, color: 'white', textAlign: 'center'}}>
-                Moves
-              </Text>
+              <Text style={styles.buttonText}>Moves</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.statsContainer}>
-            <Text
-              style={{
-                margin: 12,
-                fontSize: 20,
-                fontWeight: 'bold',
-                color: 'black',
-              }}>
-              Stats:
-            </Text>
+            <Text style={styles.statsTitle}>Stats:</Text>
             {details.stats &&
               details.stats.map((stat, index) => (
                 <View key={index} style={styles.statContainer}>
@@ -104,9 +81,16 @@ const AboutScreen = () => {
                     source={getStatImage(stat.stat.name)}
                     style={styles.icon}
                   />
-                  <Text style={styles.stat}>
-                    {stat.stat.name}: {stat.base_stat}
-                  </Text>
+                  <View style={styles.statContent}>
+                    <Text style={styles.stat}>
+                      {stat.stat.name}: {stat.base_stat}
+                    </Text>
+                    <Progress.Bar
+                      progress={stat.base_stat / 200} // Assuming 200 as the max stat value
+                      width={200}
+                      color="#3498db"
+                    />
+                  </View>
                 </View>
               ))}
           </View>
@@ -159,8 +143,30 @@ const styles = StyleSheet.create({
     color: 'green',
     marginBottom: 5,
   },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  button: {
+    backgroundColor: 'grey',
+    marginLeft: '20%',
+    borderRadius: 6,
+    padding: 12,
+  },
+  buttonText: {
+    fontSize: 18,
+    color: 'white',
+    textAlign: 'center',
+  },
   statsContainer: {
     marginTop: 10,
+  },
+  statsTitle: {
+    margin: 12,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
   },
   statContainer: {
     flexDirection: 'row',
@@ -168,11 +174,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   icon: {
-    width: 30,
-    height: 30,
+    width: 25,
+    height: 25,
     marginRight: 10,
   },
+  statContent: {
+    flexDirection: 'column',
+  },
   stat: {
+    marginBottom: 5,
     fontSize: 18,
     color: '#333',
   },

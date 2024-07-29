@@ -9,9 +9,12 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import SearchComponent from './components/SearchComponent';
 
 const Home = () => {
   const [pokemon, setPokemon] = useState([]);
+  const [filteredPokemon, setFilteredPokemon] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
@@ -36,6 +39,7 @@ const Home = () => {
 
         const detailedPokemon = await Promise.all(detailedPokemonPromises);
         setPokemon(detailedPokemon);
+        setFilteredPokemon(detailedPokemon);
       } catch (error) {
         console.error('Error fetching Pokémon data:', error);
       } finally {
@@ -45,7 +49,16 @@ const Home = () => {
 
     fetchPokemonData();
   }, []);
-
+  const handleSearch = query => {
+    if (query.trim() === '') {
+      setFilteredPokemon(pokemon);
+    } else {
+      const filteredData = pokemon.filter(poke =>
+        poke.name.toLowerCase().includes(query.toLowerCase()),
+      );
+      setFilteredPokemon(filteredData);
+    }
+  };
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -64,8 +77,9 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
+      <SearchComponent onSearch={handleSearch} />
       <FlatList
-        data={pokemon}
+        data={filteredPokemon}
         renderItem={({item}) => (
           <TouchableOpacity
             onPress={() => navigation.navigate('AboutScreen', {pokemon: item})}
@@ -87,7 +101,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
   card: {
     backgroundColor: '#ffffff',
@@ -102,7 +117,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     flex: 1,
-    aspectRatio: 1, // Ensures the card remains square
+    aspectRatio: 1,
   },
   image: {
     width: 100,
